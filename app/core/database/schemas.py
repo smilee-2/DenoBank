@@ -15,9 +15,9 @@ class UserSchemas(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
-    first_name: Mapped[str] = mapped_column(unique=True, nullable=False)
-    last_name: Mapped[str] = mapped_column(unique=True, nullable=False)
-    password: Mapped[str] = mapped_column(unique=True, nullable=False)
+    first_name: Mapped[str] = mapped_column(nullable=False)
+    last_name: Mapped[str] = mapped_column(nullable=False)
+    password: Mapped[str] = mapped_column(nullable=False)
     state: Mapped[bool] = mapped_column(nullable=False)
     role: Mapped[str] = mapped_column(nullable=False)
 
@@ -28,7 +28,7 @@ class ScoreSchemas(Base):
     __tablename__ = "scores"
 
     score_id: Mapped[int] = mapped_column(primary_key=True)
-    score: Mapped[Decimal] = mapped_column(nullable=False)
+    score: Mapped[Decimal] = mapped_column(nullable=False, default=Decimal('0.0'))
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'))
     user: Mapped["UserSchemas"] = relationship(back_populates="score")
 
@@ -40,5 +40,5 @@ class PaymentSchemas(Base):
     datetime_payment: Mapped[datetime] = mapped_column(default=datetime.now)
     from_user: Mapped[str] = mapped_column(nullable=False)
     to_user: Mapped[str] = mapped_column(nullable=False)
-    score: Mapped[Decimal] = mapped_column(nullable=False)
+    amount: Mapped[Decimal] = mapped_column(nullable=False)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'))

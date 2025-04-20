@@ -59,19 +59,19 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Use
     )
     try:
         payload = jwt.decode(token, setting_access_token.SECRET_KEY, algorithms=[setting_access_token.ALGORITHM])
-
         type_token = payload.get('type')
         if type_token != 'access':
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f'Bad token, get {type_token}, expected access')
-        username = payload.get('sub')
-        if username is None:
+        email = payload.get('sub')
+        if email is None:
             raise credentials_exception
     except InvalidTokenError:
         raise credentials_exception
 
-    user = await UserCrud.get_user_by_username(username=username)
+    user = await UserCrud.get_user_by_email(email=email)
+
     if user is None:
         raise credentials_exception
-    elif user.disabled:
+    elif not user.state:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='user disabled')
     return user

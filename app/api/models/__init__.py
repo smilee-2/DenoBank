@@ -1,1 +1,1 @@
-from app.api.models.models import UserModel
+from app.api.models.models import UserModel, AdminModel
