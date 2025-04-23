@@ -6,15 +6,15 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.api.models.models import UserModel, TokenModel, AdminModel
 from app.api.depends.depends import (
-get_current_user,
-get_password_hash,
-verify_password,
-create_access_token,
-create_refresh_token
+    get_current_user,
+    get_password_hash,
+    verify_password,
+    create_access_token,
+    create_refresh_token,
+    get_current_user_for_refresh
 )
 from app.core.database.crud import UserCrud, ScoreCrud
 from app.core.config.config import setting_access_token, setting_refresh_token
-
 
 router = APIRouter(tags=['Auth'], prefix='/auth')
 
@@ -37,6 +37,13 @@ async def create_admin(admin_role: Annotated[UserModel, Depends(get_current_user
     hashed_password = get_password_hash(admin.password)
     admin.password = hashed_password
     return await UserCrud.create_user(user_input=admin)
+
+
+@router.post('/refresh_token', response_model=TokenModel, response_model_exclude_none=True)
+async def auth_refresh_jwt(user: Annotated[UserModel, Depends(get_current_user_for_refresh)]):
+    access_token = create_access_token(user.model_dump())
+
+    return TokenModel(access_token=access_token)
 
 
 @router.post("/token")

@@ -11,7 +11,7 @@ class DataBaseSettings(BaseSettings):
     echo - вывод в консоль запросов в бд
     """
     url: str = "postgresql+asyncpg://postgres:123@localhost:5432/postgres"
-    echo: bool = True
+    echo: bool = False
 
 
 class SettingToken(BaseSettings):

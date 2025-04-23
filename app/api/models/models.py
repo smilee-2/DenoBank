@@ -36,6 +36,6 @@ class AdminModel(UserModel):
 class TokenModel(Base):
     """Валидация токена"""
     access_token: str
-    refresh_token: str
+    refresh_token: str | None
     token_type: str = 'Bearer'
 

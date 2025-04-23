@@ -11,7 +11,7 @@ from app.core.database.schemas import UserSchemas, ScoreSchemas, PaymentSchemas
 class UserCrud:
 
     @staticmethod
-    async def get_all_users():
+    async def get_all_users() -> list[UserModel]:
         """Вернет всех пользователей"""
         async with session_maker.begin() as session:
             query = select(UserSchemas)
@@ -147,6 +147,7 @@ class UserCrud:
                 user.state = True
                 return {'message': 'user was enabled'}
 
+
 class ScoreCrud:
 
     @staticmethod
@@ -158,7 +159,7 @@ class ScoreCrud:
             result = await session.execute(query)
             scores = result.scalars()
             if scores:
-                return {idx:score.score for idx, score in enumerate(scores)}
+                return {idx: score.score for idx, score in enumerate(scores)}
 
     @staticmethod
     async def create_new_score(email: EmailStr) -> dict[str, str]:
@@ -180,9 +181,14 @@ class ScoreCrud:
                 await session.delete(ScoreSchemas, user.id)
                 return {'msg': 'score was deleted'}
 
+
 class PaymentCrud:
     @staticmethod
-    async def transfer_money(amount: Decimal, user_id: int, score_id: int, payment: PaymentModel) -> dict[str, str] | None:
+    async def transfer_money(amount: Decimal,
+                             user_id: int,
+                             score_id: int,
+                             payment: PaymentModel
+                             ) -> dict[str, str] | None:
         """Зачислить деньги на счет"""
         async with session_maker.begin() as session:
             query = select(ScoreSchemas).filter_by(score_id=score_id, user_id=user_id)
@@ -193,10 +199,3 @@ class PaymentCrud:
                 pay = PaymentSchemas(**payment.model_dump())
                 session.add(pay)
                 return {'msg': 'the money is credited'}
-
-
-    @staticmethod
-    async def withdraw_money(amount: Decimal):
-        """Снять деньги со счета"""
-        async with session_maker.begin() as session:
-            ...

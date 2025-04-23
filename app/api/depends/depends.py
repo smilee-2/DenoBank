@@ -76,5 +76,31 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Use
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='user disabled')
     return user
 
+async def get_current_user_for_refresh(token: Annotated[str, Depends(oauth2_scheme)]) -> UserModel:
+    """Проверит текущего пользователя по refresh"""
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail='Could not validate credentials',
+        headers={'WWW-Authenticate': 'Bearer'},
+    )
+    try:
+        payload = jwt.decode(token, setting_access_token.SECRET_KEY, algorithms=[setting_access_token.ALGORITHM])
+        type_token = payload.get('type')
+        if type_token != 'refresh':
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f'Bad token, get {type_token}, expected access')
+        email = payload.get('sub')
+        if email is None:
+            raise credentials_exception
+    except InvalidTokenError:
+        raise credentials_exception
+
+    user = await UserCrud.get_user_by_email(email=email)
+
+    if user is None:
+        raise credentials_exception
+    elif not user.state:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='user disabled')
+    return user
+
 if __name__ == '__main__':
     print(get_password_hash('1115509d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7'))
