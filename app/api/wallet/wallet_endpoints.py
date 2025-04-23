@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.api.depends.depends import get_current_user, get_password_hash, verify_password
 from app.api.models.models import PaymentModel, UserModel
 from app.core.database.crud import ScoreCrud, PaymentCrud
-from app.core.config.config import setting_check_sig
+from app.core.config.config import setting_check_sig, HTTP_BEARER
 
-router = APIRouter(prefix='/wallets', tags=['Wallet'])
+router = APIRouter(prefix='/wallets', tags=['Wallet'], dependencies=[Depends(HTTP_BEARER)])
 
 
 @router.get('/get_user_scores')

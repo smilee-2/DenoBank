@@ -5,10 +5,10 @@ from pydantic import EmailStr
 
 from app.api.models import UserModel
 from app.api.depends.depends import get_current_user
-from app.core.database.schemas import UserSchemas
+from app.core.config.config import HTTP_BEARER
 from app.core.database.crud import UserCrud, ScoreCrud
 
-router = APIRouter(tags=['User'], prefix='/users')
+router = APIRouter(tags=['User'], prefix='/users', dependencies=[Depends(HTTP_BEARER)])
 
 
 @router.get('/get_user_id')

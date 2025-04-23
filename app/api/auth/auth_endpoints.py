@@ -13,10 +13,10 @@ from app.api.depends.depends import (
     create_refresh_token,
     get_current_user_for_refresh
 )
-from app.core.database.crud import UserCrud, ScoreCrud
-from app.core.config.config import setting_access_token, setting_refresh_token
+from app.core.database.crud import UserCrud
+from app.core.config.config import setting_access_token, setting_refresh_token, HTTP_BEARER
 
-router = APIRouter(tags=['Auth'], prefix='/auth')
+router = APIRouter(tags=['Auth'], prefix='/auth', dependencies=[Depends(HTTP_BEARER)])
 
 
 @router.post('/register')

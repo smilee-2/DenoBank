@@ -154,7 +154,7 @@ class ScoreCrud:
     async def get_user_scores(email: EmailStr) -> dict | None:
         """Получить счета пользователя"""
         async with session_maker.begin() as session:
-            user_id = await UserCrud.get_user_id(email)
+            user_id = await UserCrud.get_user_id(email=email)
             query = select(ScoreSchemas).where(ScoreSchemas.user_id == user_id)
             result = await session.execute(query)
             scores = result.scalars()

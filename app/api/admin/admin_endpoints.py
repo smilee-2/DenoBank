@@ -6,9 +6,10 @@ from pydantic import EmailStr
 from app.api.auth.auth_endpoints import register_new_user
 from app.api.depends.depends import get_current_user
 from app.api.models import AdminModel, UserModel
+from app.core.config.config import HTTP_BEARER
 from app.core.database.crud import UserCrud, ScoreCrud
 
-router = APIRouter(tags=['Admin'], prefix='/admins')
+router = APIRouter(tags=['Admin'], prefix='/admins', dependencies=[Depends(HTTP_BEARER)])
 
 
 @router.get('/user_with_scores')

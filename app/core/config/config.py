@@ -1,8 +1,10 @@
 import os
 
+from fastapi.security import HTTPBearer
 from pydantic_settings import BaseSettings
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
+HTTP_BEARER = HTTPBearer(auto_error=False)
 
 class DataBaseSettings(BaseSettings):
     """

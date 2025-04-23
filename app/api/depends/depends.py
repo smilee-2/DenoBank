@@ -37,7 +37,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     encoded_jwt = jwt.encode(to_encode, setting_access_token.SECRET_KEY, algorithm=setting_access_token.ALGORITHM)
     return encoded_jwt
 
-# TODO
+
 def create_refresh_token(data: dict, expires_delta: timedelta | None = None) -> str:
     """Создаст и вернет refresh jwt токен"""
     to_encode = data.copy()
@@ -87,7 +87,7 @@ async def get_current_user_for_refresh(token: Annotated[str, Depends(oauth2_sche
         payload = jwt.decode(token, setting_access_token.SECRET_KEY, algorithms=[setting_access_token.ALGORITHM])
         type_token = payload.get('type')
         if type_token != 'refresh':
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f'Bad token, get {type_token}, expected access')
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f'Bad token, get {type_token}, expected refresh')
         email = payload.get('sub')
         if email is None:
             raise credentials_exception
