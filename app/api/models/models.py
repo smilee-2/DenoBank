@@ -19,9 +19,10 @@ class UserModel(Base):
     model_config = ConfigDict(from_attributes=True)
 
 
-class Payment(Base):
-    transaction_id: str
-    account_id: int
+class PaymentModel(Base):
+    """Валидация платежа"""
+    transaction_id: int
+    score_id: int
     user_id: int
     amount: Decimal
     signature: str
@@ -38,7 +39,3 @@ class TokenModel(Base):
     refresh_token: str
     token_type: str = 'Bearer'
 
-
-
-class TokenData(Base):
-    username: str | None = None

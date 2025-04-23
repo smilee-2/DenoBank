@@ -1,1 +1,1 @@
-from app.api.models.models import UserModel, AdminModel
+from app.api.models.models import UserModel, AdminModel, PaymentModel

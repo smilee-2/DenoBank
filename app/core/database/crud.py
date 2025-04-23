@@ -3,12 +3,21 @@ from decimal import Decimal
 from pydantic import EmailStr
 from sqlalchemy import select
 
-from app.api.models import UserModel
+from app.api.models import UserModel, PaymentModel
 from app.core.config.config import session_maker
 from app.core.database.schemas import UserSchemas, ScoreSchemas, PaymentSchemas
 
 
 class UserCrud:
+
+    @staticmethod
+    async def get_all_users():
+        """Вернет всех пользователей"""
+        async with session_maker.begin() as session:
+            query = select(UserSchemas)
+            result = await session.execute(query)
+            users = result.scalars().all()
+            return [UserModel.model_validate(user) for user in users]
 
     @staticmethod
     async def get_user_by_id(user_id: int) -> UserModel | None:
@@ -53,7 +62,6 @@ class UserCrud:
             user = UserSchemas(**user_input.model_dump())
             session.add(user)
             await session.flush()
-
             score = ScoreSchemas(score=Decimal('0.0'), user_id=user.id)
             session.add(score)
             return {'message': 'user was created'}
@@ -99,6 +107,7 @@ class UserCrud:
 
     @staticmethod
     async def patch_password(new_password: str, email: EmailStr) -> dict[str, str] | None:
+        """Обновит password пользователя"""
         async with session_maker.begin() as session:
             stmt = select(UserSchemas).where(
                 UserSchemas.email == email
@@ -110,34 +119,81 @@ class UserCrud:
                 return {'msg': 'password was update'}
 
     @staticmethod
-    async def delete_user_by_id(user_id: int) -> bool:
+    async def delete_user_by_id(user_id: int) -> dict[str, str]:
         """Удалит пользователя из БД по id"""
         async with session_maker.begin() as session:
-            await session.delete(UserSchemas, user_id)
-            return True
+            user = await session.get(UserSchemas, user_id)
 
+            await session.delete(user)
+            return {'msg': 'user was deleted'}
+
+    @staticmethod
+    async def disable_user(email: EmailStr) -> dict[str, str] | None:
+        async with session_maker.begin() as session:
+            query_user = select(UserSchemas).where(UserSchemas.email == email)
+            result = await session.execute(query_user)
+            user = result.scalar_one_or_none()
+            if user:
+                user.state = False
+                return {'message': 'user was disabled'}
+
+    @staticmethod
+    async def enable_user(email: EmailStr) -> dict[str, str] | None:
+        async with session_maker.begin() as session:
+            query_user = select(UserSchemas).where(UserSchemas.email == email)
+            result = await session.execute(query_user)
+            user = result.scalar_one_or_none()
+            if user:
+                user.state = True
+                return {'message': 'user was enabled'}
 
 class ScoreCrud:
 
     @staticmethod
-    async def get_user_score(email: EmailStr) -> Decimal | None:
-        """Получить счет пользователя"""
+    async def get_user_scores(email: EmailStr) -> dict | None:
+        """Получить счета пользователя"""
         async with session_maker.begin() as session:
             user_id = await UserCrud.get_user_id(email)
             query = select(ScoreSchemas).where(ScoreSchemas.user_id == user_id)
             result = await session.execute(query)
-            score = result.scalar_one_or_none()
-            if score:
-                return score.score
+            scores = result.scalars()
+            if scores:
+                return {idx:score.score for idx, score in enumerate(scores)}
 
+    @staticmethod
+    async def create_new_score(email: EmailStr) -> dict[str, str]:
+        """Создаст новый счет пользователя"""
+        async with session_maker.begin() as session:
+            user_id = await UserCrud.get_user_id(email=email)
+            score = ScoreSchemas(score=Decimal('0.0'), user_id=user_id)
+            session.add(score)
+            return {'msg': 'score was created'}
+
+    @staticmethod
+    async def delete_score_user(email: EmailStr) -> dict[str, str] | None:
+        """Удалит счет пользователя"""
+        async with session_maker.begin() as session:
+            query = select(UserSchemas).where(UserSchemas.email == email).subquery()
+            result = await session.execute(query)
+            user = result.scalar_one_or_none()
+            if user:
+                await session.delete(ScoreSchemas, user.id)
+                return {'msg': 'score was deleted'}
 
 class PaymentCrud:
     @staticmethod
-    async def transfer_money(amount: Decimal):
+    async def transfer_money(amount: Decimal, user_id: int, score_id: int, payment: PaymentModel) -> dict[str, str] | None:
         """Зачислить деньги на счет"""
         async with session_maker.begin() as session:
-            query = select()
-            ...
+            query = select(ScoreSchemas).filter_by(score_id=score_id, user_id=user_id)
+            result_for_score = await session.execute(query)
+            score = result_for_score.scalar_one_or_none()
+            if score:
+                score.score += amount
+                pay = PaymentSchemas(**payment.model_dump())
+                session.add(pay)
+                return {'msg': 'the money is credited'}
+
 
     @staticmethod
     async def withdraw_money(amount: Decimal):

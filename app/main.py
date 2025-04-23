@@ -23,7 +23,7 @@ app.include_router(auth_router)
 app.include_router(admin_router)
 app.include_router(wallet_router)
 
-@app.get('/')
+@app.get('/', tags=['Main'])
 async def main():
     return {'msg': 'main'}
 

@@ -37,6 +37,8 @@ class RefreshToken(SettingToken):
 setting_database = DataBaseSettings()
 setting_access_token = AccessToken()
 setting_refresh_token = RefreshToken()
+setting_check_sig = SettingToken()
+
 
 engine = create_async_engine(
     url=setting_database.url,

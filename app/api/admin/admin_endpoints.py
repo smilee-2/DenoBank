@@ -6,7 +6,7 @@ from pydantic import EmailStr
 from app.api.auth.auth_endpoints import register_new_user
 from app.api.depends.depends import get_current_user
 from app.api.models import AdminModel, UserModel
-from app.core.database.crud import UserCrud
+from app.core.database.crud import UserCrud, ScoreCrud
 
 router = APIRouter(tags=['Admin'], prefix='/admins')
 
@@ -17,6 +17,20 @@ router = APIRouter(tags=['Admin'], prefix='/admins')
 Создать/Удалить/Обновить пользователя
 Получить список пользователей и список его счетов с балансами
 """
+
+@router.get('/user_with_scores')
+async def get_user_scores(email: EmailStr, admin: Annotated[AdminModel, Depends(get_current_user)]):
+    """Получить список счетов с балансами пользователя"""
+    if admin.role != 'admin':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='not admin')
+    return await ScoreCrud.get_user_scores(email=email)
+
+@router.get('/all_users')
+async def get_all_users(admin: Annotated[AdminModel, Depends(get_current_user)]):
+    """Получить список пользователей"""
+    if admin.role != 'admin':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='not admin')
+    return await UserCrud.get_all_users()
 
 @router.post('/create_user')
 async def create_user(user: Annotated[UserModel, Depends()], admin: Annotated[AdminModel, Depends(get_current_user)]):
@@ -45,3 +59,17 @@ async def update_user_email(new_email: EmailStr, old_email: EmailStr, admin: Ann
     if admin.role != 'admin':
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='not admin')
     return await UserCrud.patch_email_user_for_admin(new_email=new_email, old_email=old_email)
+
+@router.patch('/disable_user')
+async def disable_user(email: EmailStr, admin: Annotated[AdminModel, Depends(get_current_user)]):
+    """Заблокирует пользователя"""
+    if admin.role != 'admin':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='not admin')
+    return await UserCrud.disable_user(email=email)
+
+@router.patch('/enable_user')
+async def enable_user(email: EmailStr, admin: Annotated[AdminModel, Depends(get_current_user)]):
+    """Разблокирует пользователя"""
+    if admin.role != 'admin':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='not admin')
+    return await UserCrud.enable_user(email=email)

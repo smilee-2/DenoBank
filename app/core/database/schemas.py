@@ -21,24 +21,27 @@ class UserSchemas(Base):
     state: Mapped[bool] = mapped_column(nullable=False)
     role: Mapped[str] = mapped_column(nullable=False)
 
-    score: Mapped[list["ScoreSchemas"]] = relationship(back_populates="user")
+    score: Mapped[list["ScoreSchemas"]] = relationship(back_populates="user",cascade='all, delete-orphan',passive_deletes=True,)
 
 
 class ScoreSchemas(Base):
     __tablename__ = "scores"
 
-    score_id: Mapped[int] = mapped_column(primary_key=True)
+    score_id: Mapped[int] = mapped_column(primary_key=True, unique=True)
     score: Mapped[Decimal] = mapped_column(nullable=False, default=Decimal('0.0'))
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'))
-    user: Mapped["UserSchemas"] = relationship(back_populates="score")
+    user: Mapped["UserSchemas"] = relationship(
+        back_populates="score",
+    )
 
 
 class PaymentSchemas(Base):
     __tablename__ = 'payments'
 
-    payment_id: Mapped[int] = mapped_column(primary_key=True)
-    datetime_payment: Mapped[datetime] = mapped_column(default=datetime.now)
-    from_user: Mapped[str] = mapped_column(nullable=False)
-    to_user: Mapped[str] = mapped_column(nullable=False)
+    payment_id: Mapped[int] = mapped_column(primary_key=True, unique=True)
+    score_id: Mapped[int] = mapped_column(nullable=False, unique=True)
+    transaction_id: Mapped[int] = mapped_column(nullable=False, unique=True)
     amount: Mapped[Decimal] = mapped_column(nullable=False)
+    signature: Mapped[str] = mapped_column(nullable=False)
+    datetime_payment: Mapped[datetime] = mapped_column(default=datetime.now)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'))
