@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, EmailStr
@@ -26,6 +27,13 @@ class PaymentModel(Base):
     user_id: int
     amount: Decimal
     signature: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+class PaymentDateModel(PaymentModel):
+    """Для crud get_all_payments, чтобы вернуть и время платежа"""
+    datetime_payment: datetime
+
 
 
 class AdminModel(UserModel):

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.api.depends.depends import get_current_user, get_password_hash, verify_password
 from app.api.models.models import PaymentModel, UserModel
-from app.core.database.crud import ScoreCrud, PaymentCrud
+from app.core.database.crud import ScoreCrud, PaymentCrud, UserCrud
 from app.core.config.config import setting_check_sig, HTTP_BEARER
 
 router = APIRouter(prefix='/wallets', tags=['Wallet'], dependencies=[Depends(HTTP_BEARER)])
@@ -17,6 +17,13 @@ async def get_user_scores(user: Annotated[UserModel, Depends(get_current_user)])
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='user disable')
     return await ScoreCrud.get_user_scores(email=user.email)
 
+@router.get('/get_user_payments')
+async def get_user_payments(user: Annotated[UserModel, Depends(get_current_user)]) -> list[PaymentModel] | None:
+    """Получить платежи пользователя"""
+    if not user.state:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='user disable')
+    user_id = await UserCrud.get_user_id(email=user.email)
+    return await PaymentCrud.get_all_payments(user_id=user_id)
 
 @router.get('/create_new_score')
 async def create_new_score(user: Annotated[UserModel, Depends(get_current_user)]) -> dict[str, str]:

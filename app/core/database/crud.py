@@ -3,7 +3,7 @@ from decimal import Decimal
 from pydantic import EmailStr
 from sqlalchemy import select
 
-from app.api.models import UserModel, PaymentModel
+from app.api.models import UserModel, PaymentModel, PaymentDateModel
 from app.core.config.config import session_maker
 from app.core.database.schemas import UserSchemas, ScoreSchemas, PaymentSchemas
 
@@ -17,6 +17,7 @@ class UserCrud:
             query = select(UserSchemas)
             result = await session.execute(query)
             users = result.scalars().all()
+            print(users)
             return [UserModel.model_validate(user) for user in users]
 
     @staticmethod
@@ -179,6 +180,7 @@ class ScoreCrud:
             user = result.scalar_one_or_none()
             if user:
                 await session.delete(ScoreSchemas, user.id)
+                await session.delete(PaymentSchemas, user.id)
                 return {'msg': 'score was deleted'}
 
 
@@ -199,3 +201,30 @@ class PaymentCrud:
                 pay = PaymentSchemas(**payment.model_dump())
                 session.add(pay)
                 return {'msg': 'the money is credited'}
+
+    @staticmethod
+    async def get_all_payments(user_id: int) -> list[PaymentModel]:
+        """Вернет платежи пользователя"""
+        async with session_maker.begin() as session:
+            query = select(PaymentSchemas).where(PaymentSchemas.user_id == user_id)
+            result = await session.execute(query)
+            payments = result.scalars().all()
+            return [PaymentDateModel.model_validate(payment) for payment in payments]
+
+"""
+    @staticmethod
+    async def get_all_users() -> list[UserModel]:
+        async with session_maker.begin() as session:
+            query = select(UserSchemas)
+            result = await session.execute(query)
+            users = result.scalars().all()
+            return [UserModel.model_validate(user) for user in users]
+
+    PaymentModel(
+                    transaction_id=payment.transaction_id,
+                    score_id=payment.score_id,
+                    user_id=payment.user_id,
+                    amount=payment.amount,
+                    signature=payment.signature
+                    )
+"""

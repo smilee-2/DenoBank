@@ -12,7 +12,7 @@ from app.core.database.crud import UserCrud, ScoreCrud
 router = APIRouter(tags=['Admin'], prefix='/admins', dependencies=[Depends(HTTP_BEARER)])
 
 
-@router.get('/user_with_scores')
+@router.get('/get_user_with_scores')
 async def get_user_scores(email: EmailStr, admin: Annotated[AdminModel, Depends(get_current_user)]) -> dict | None:
     """Получить список счетов с балансами пользователя"""
     if admin.role != 'admin':
@@ -20,7 +20,7 @@ async def get_user_scores(email: EmailStr, admin: Annotated[AdminModel, Depends(
     return await ScoreCrud.get_user_scores(email=email)
 
 
-@router.get('/all_users')
+@router.get('/get_all_users')
 async def get_all_users(admin: Annotated[AdminModel, Depends(get_current_user)]) -> list[UserModel]:
     """Получить список пользователей"""
     if admin.role != 'admin':

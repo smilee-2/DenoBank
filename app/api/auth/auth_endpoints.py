@@ -16,7 +16,7 @@ from app.api.depends.depends import (
 from app.core.database.crud import UserCrud
 from app.core.config.config import setting_access_token, setting_refresh_token, HTTP_BEARER
 
-router = APIRouter(tags=['Auth'], prefix='/auth', dependencies=[Depends(HTTP_BEARER)])
+router = APIRouter(tags=['Auth'], prefix='/auth')
 
 
 @router.post('/register')
@@ -28,10 +28,10 @@ async def register_new_user(user: UserModel = Depends()) -> dict[str, str]:
     return await UserCrud.create_user(user_input=user_)
 
 
-@router.post('/create_admin')
+@router.post('/create_admin', dependencies=[Depends(HTTP_BEARER)])
 async def create_admin(admin_role: Annotated[UserModel, Depends(get_current_user)],
                        admin: AdminModel = Depends()) -> dict[str, str]:
-    """эндпоинт для регистрации админа"""
+    """Эндпоинт для регистрации админа"""
     if admin_role.role != 'admin':
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='not admin')
     hashed_password = get_password_hash(admin.password)
@@ -39,16 +39,16 @@ async def create_admin(admin_role: Annotated[UserModel, Depends(get_current_user
     return await UserCrud.create_user(user_input=admin)
 
 
-@router.post('/refresh_token', response_model=TokenModel, response_model_exclude_none=True)
+@router.post('/refresh_token', response_model=TokenModel, response_model_exclude_none=True, dependencies=[Depends(HTTP_BEARER)])
 async def auth_refresh_jwt(user: Annotated[UserModel, Depends(get_current_user_for_refresh)]):
+    """Обновит access token через refresh token"""
     access_token = create_access_token(user.model_dump())
-
     return TokenModel(access_token=access_token)
 
 
 @router.post("/token")
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> TokenModel:
-    """эндпоинт проверит пользователя и вернет jwt токен"""
+    """Эндпоинт проверит пользователя и вернет jwt токен"""
 
     user_except = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
