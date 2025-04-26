@@ -12,7 +12,7 @@ class DataBaseSettings(BaseSettings):
     url - драйвер для бд
     echo - вывод в консоль запросов в бд
     """
-    url: str = "postgresql+asyncpg://postgres:123@localhost:5432/postgres"
+    url: str = 'postgresql+asyncpg://postgres:123@localhost:5432/postgres'
     echo: bool = False
 
 
@@ -23,7 +23,7 @@ class SettingToken(BaseSettings):
     ALGORITHM - алгоритм шифрования
     """
     SECRET_KEY: str = str(os.getenv('SECRET_KEY'))
-    ALGORITHM: str = "HS256"
+    ALGORITHM: str = 'HS256'
 
 
 class AccessToken(SettingToken):
