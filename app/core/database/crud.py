@@ -211,20 +211,3 @@ class PaymentCrud:
             payments = result.scalars().all()
             return [PaymentDateModel.model_validate(payment) for payment in payments]
 
-"""
-    @staticmethod
-    async def get_all_users() -> list[UserModel]:
-        async with session_maker.begin() as session:
-            query = select(UserSchemas)
-            result = await session.execute(query)
-            users = result.scalars().all()
-            return [UserModel.model_validate(user) for user in users]
-
-    PaymentModel(
-                    transaction_id=payment.transaction_id,
-                    score_id=payment.score_id,
-                    user_id=payment.user_id,
-                    amount=payment.amount,
-                    signature=payment.signature
-                    )
-"""
