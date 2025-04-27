@@ -27,6 +27,7 @@ class UserCrud:
             user = await session.get(UserSchemas, user_id)
             if user:
                 return UserModel.model_validate(user)
+            return None
 
     @staticmethod
     async def get_user_id(email: EmailStr) -> int | None:
@@ -37,6 +38,7 @@ class UserCrud:
             user = result.scalar_one_or_none()
             if user:
                 return user.id
+            return None
 
     @staticmethod
     async def get_user_email(user_id: int) -> int | None:
@@ -45,6 +47,7 @@ class UserCrud:
             user = await session.get(UserSchemas, user_id)
             if user:
                 return user.email
+            return None
 
     @staticmethod
     async def get_user_by_email(email: str) -> UserModel | None:
@@ -55,6 +58,7 @@ class UserCrud:
             user = result.scalar_one_or_none()
             if user:
                 return UserModel.model_validate(user)
+            return None
 
     @staticmethod
     async def create_user(user_input: UserModel) -> dict[str, str]:
@@ -79,6 +83,7 @@ class UserCrud:
             if user:
                 user = UserSchemas(**new_user.model_dump())
                 return {'msg': 'user was update'}
+            return None
 
     @staticmethod
     async def patch_email_user_for_admin(new_email: EmailStr, old_email: EmailStr) -> dict[str, str] | None:
@@ -92,6 +97,7 @@ class UserCrud:
             if user:
                 user.email = new_email
                 return {'msg': 'email was update'}
+            return None
 
     @staticmethod
     async def patch_email_user(new_email: EmailStr, old_email: EmailStr) -> dict[str, str] | None:
@@ -105,6 +111,7 @@ class UserCrud:
             if user:
                 user.email = new_email
                 return {'msg': 'email was update'}
+            return None
 
     @staticmethod
     async def patch_password(new_password: str, email: EmailStr) -> dict[str, str] | None:
@@ -118,6 +125,7 @@ class UserCrud:
             if user:
                 user.password = new_password
                 return {'msg': 'password was update'}
+            return None
 
     @staticmethod
     async def delete_user_by_id(user_id: int) -> dict[str, str]:
@@ -137,6 +145,7 @@ class UserCrud:
             if user:
                 user.state = False
                 return {'message': 'user was disabled'}
+            return None
 
     @staticmethod
     async def enable_user(email: EmailStr) -> dict[str, str] | None:
@@ -147,6 +156,7 @@ class UserCrud:
             if user:
                 user.state = True
                 return {'message': 'user was enabled'}
+            return None
 
 
 class ScoreCrud:
@@ -161,6 +171,7 @@ class ScoreCrud:
             scores = result.scalars()
             if scores:
                 return {idx: score.score for idx, score in enumerate(scores)}
+            return None
 
     @staticmethod
     async def create_new_score(email: EmailStr) -> dict[str, str]:
@@ -182,6 +193,7 @@ class ScoreCrud:
                 await session.delete(ScoreSchemas, user.id)
                 await session.delete(PaymentSchemas, user.id)
                 return {'msg': 'score was deleted'}
+            return None
 
 
 class PaymentCrud:
@@ -201,6 +213,7 @@ class PaymentCrud:
                 pay = PaymentSchemas(**payment.model_dump())
                 session.add(pay)
                 return {'msg': 'the money is credited'}
+            return None
 
     @staticmethod
     async def get_all_payments(user_id: int) -> list[PaymentModel]:
