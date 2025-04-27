@@ -12,11 +12,11 @@ __данные для тестов__
   - password - 123
 
 Пополнить баланс админу (один раз т.к. транзакции уникальны, необходимо обновлять сигнатуру, можно в модуле depends):
-- transaction_id - 2
+- transaction_id - 3
 - score_id - 1
 - user_id - 1
 - amount - 55
-- сигнатура - $2b$12$uLfU3o5QTTU1agk4/mqOmuPACOysPdCyNicYwg8ItzfO2.I6838DS
+- сигнатура - $2b$12$C9CBHb9BhjucvTbtCwxvTufrPaoRprdYvMoafJgj.1YssM41aDgsK
 ___
 
 Необходимо реализовать работу со следующими сущностями:
