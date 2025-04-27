@@ -39,7 +39,7 @@ class PaymentSchemas(Base):
     __tablename__ = 'payments'
 
     payment_id: Mapped[int] = mapped_column(primary_key=True)
-    score_id: Mapped[int] = mapped_column(nullable=False, unique=True)
+    score_id: Mapped[int] = mapped_column(nullable=False)
     transaction_id: Mapped[int] = mapped_column(nullable=False, unique=True)
     amount: Mapped[Decimal] = mapped_column(nullable=False)
     signature: Mapped[str] = mapped_column(nullable=False)

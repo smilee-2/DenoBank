@@ -12,7 +12,7 @@ class DataBaseSettings(BaseSettings):
     url - драйвер для бд
     echo - вывод в консоль запросов в бд
     """
-    url: str = 'postgresql+asyncpg://postgres:123@localhost:5432/postgres'
+    url: str = 'postgresql+asyncpg://postgres:123@pg:5432/postgres'
     echo: bool = False
 
 

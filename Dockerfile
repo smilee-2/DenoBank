@@ -14,6 +14,6 @@ COPY . .
 
 RUN chmod +x prestart.sh
 
-ENTRYPOINT ["prestart.sh"]
+ENTRYPOINT ["./prestart.sh"]
 
 CMD ["python", "app/main.py"]
