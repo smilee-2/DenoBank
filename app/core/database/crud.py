@@ -21,16 +21,16 @@ class UserCrud:
             return [UserModel.model_validate(user) for user in users]
 
     @staticmethod
-    async def get_user_by_id(user_id: int) -> UserModel | None:
+    async def get_user_by_id(user_id: int) -> UserModel | dict[str, str]:
         """Вернет пользователя по id"""
         async with session_maker.begin() as session:
             user = await session.get(UserSchemas, user_id)
             if user:
                 return UserModel.model_validate(user)
-            return None
+            return {'msg': 'user not found'}
 
     @staticmethod
-    async def get_user_id(email: EmailStr) -> int | None:
+    async def get_user_id(email: EmailStr) -> int | dict[str, str]:
         """Вернет id пользователя"""
         async with session_maker.begin() as session:
             query = select(UserSchemas).where(UserSchemas.email == email)
@@ -38,19 +38,19 @@ class UserCrud:
             user = result.scalar_one_or_none()
             if user:
                 return user.id
-            return None
+            return {'msg': 'user not found'}
 
     @staticmethod
-    async def get_user_email(user_id: int) -> int | None:
+    async def get_user_email(user_id: int) -> int | dict[str, str]:
         """Вернет email пользователя"""
         async with session_maker.begin() as session:
             user = await session.get(UserSchemas, user_id)
             if user:
                 return user.email
-            return None
+            return {'msg': 'user not found'}
 
     @staticmethod
-    async def get_user_by_email(email: str) -> UserModel | None:
+    async def get_user_by_email(email: str) -> UserModel | dict[str, str]:
         """Вернет пользователя по email"""
         async with session_maker.begin() as session:
             query = select(UserSchemas).where(UserSchemas.email == email)
@@ -58,7 +58,7 @@ class UserCrud:
             user = result.scalar_one_or_none()
             if user:
                 return UserModel.model_validate(user)
-            return None
+            return {'msg': 'user not found'}
 
     @staticmethod
     async def create_user(user_input: UserModel) -> dict[str, str]:
@@ -72,7 +72,7 @@ class UserCrud:
             return {'message': 'user was created'}
 
     @staticmethod
-    async def update_user(user_id: int, new_user: UserModel) -> dict[str, str] | None:
+    async def update_user(user_id: int, new_user: UserModel) -> dict[str, str]:
         """Полностью обновит пользователя"""
         async with session_maker.begin() as session:
             stmt = select(UserSchemas).where(
@@ -83,10 +83,10 @@ class UserCrud:
             if user:
                 user = UserSchemas(**new_user.model_dump())
                 return {'msg': 'user was update'}
-            return None
+            return {'msg': 'user not found'}
 
     @staticmethod
-    async def patch_email_user_for_admin(new_email: EmailStr, old_email: EmailStr) -> dict[str, str] | None:
+    async def patch_email_user_for_admin(new_email: EmailStr, old_email: EmailStr) -> dict[str, str]:
         """Обновит email пользователя"""
         async with session_maker.begin() as session:
             stmt = select(UserSchemas).where(
@@ -97,10 +97,10 @@ class UserCrud:
             if user:
                 user.email = new_email
                 return {'msg': 'email was update'}
-            return None
+            return {'msg': 'user not found'}
 
     @staticmethod
-    async def patch_email_user(new_email: EmailStr, old_email: EmailStr) -> dict[str, str] | None:
+    async def patch_email_user(new_email: EmailStr, old_email: EmailStr) -> dict[str, str]:
         """Обновит email пользователя"""
         async with session_maker.begin() as session:
             stmt = select(UserSchemas).where(
@@ -111,10 +111,10 @@ class UserCrud:
             if user:
                 user.email = new_email
                 return {'msg': 'email was update'}
-            return None
+            return {'msg': 'user not found'}
 
     @staticmethod
-    async def patch_password(new_password: str, email: EmailStr) -> dict[str, str] | None:
+    async def patch_password(new_password: str, email: EmailStr) -> dict[str, str]:
         """Обновит password пользователя"""
         async with session_maker.begin() as session:
             stmt = select(UserSchemas).where(
@@ -125,7 +125,7 @@ class UserCrud:
             if user:
                 user.password = new_password
                 return {'msg': 'password was update'}
-            return None
+            return {'msg': 'user not found'}
 
     @staticmethod
     async def delete_user_by_id(user_id: int) -> dict[str, str]:
@@ -137,7 +137,7 @@ class UserCrud:
             return {'msg': 'user was deleted'}
 
     @staticmethod
-    async def disable_user(email: EmailStr) -> dict[str, str] | None:
+    async def disable_user(email: EmailStr) -> dict[str, str]:
         async with session_maker.begin() as session:
             query_user = select(UserSchemas).where(UserSchemas.email == email)
             result = await session.execute(query_user)
@@ -145,10 +145,10 @@ class UserCrud:
             if user:
                 user.state = False
                 return {'message': 'user was disabled'}
-            return None
+            return {'msg': 'user not found'}
 
     @staticmethod
-    async def enable_user(email: EmailStr) -> dict[str, str] | None:
+    async def enable_user(email: EmailStr) -> dict[str, str]:
         async with session_maker.begin() as session:
             query_user = select(UserSchemas).where(UserSchemas.email == email)
             result = await session.execute(query_user)
@@ -156,13 +156,13 @@ class UserCrud:
             if user:
                 user.state = True
                 return {'message': 'user was enabled'}
-            return None
+            return {'msg': 'user not found'}
 
 
 class ScoreCrud:
 
     @staticmethod
-    async def get_user_scores(email: EmailStr) -> dict | None:
+    async def get_user_scores(email: EmailStr) -> dict:
         """Получить счета пользователя"""
         async with session_maker.begin() as session:
             user_id = await UserCrud.get_user_id(email=email)
@@ -171,7 +171,7 @@ class ScoreCrud:
             scores = result.scalars()
             if scores:
                 return {idx: score.score for idx, score in enumerate(scores)}
-            return None
+            return {'msg': 'scores not found'}
 
     @staticmethod
     async def create_new_score(email: EmailStr) -> dict[str, str]:
@@ -183,7 +183,7 @@ class ScoreCrud:
             return {'msg': 'score was created'}
 
     @staticmethod
-    async def delete_score_user(email: EmailStr) -> dict[str, str] | None:
+    async def delete_score_user(email: EmailStr) -> dict[str, str]:
         """Удалит счет пользователя"""
         async with session_maker.begin() as session:
             query = select(UserSchemas).where(UserSchemas.email == email).subquery()
@@ -193,7 +193,7 @@ class ScoreCrud:
                 await session.delete(ScoreSchemas, user.id)
                 await session.delete(PaymentSchemas, user.id)
                 return {'msg': 'score was deleted'}
-            return None
+            return {'msg': 'score not found'}
 
 
 class PaymentCrud:
@@ -202,7 +202,7 @@ class PaymentCrud:
                              user_id: int,
                              score_id: int,
                              payment: PaymentModel
-                             ) -> dict[str, str] | None:
+                             ) -> dict[str, str]:
         """Зачислить деньги на счет"""
         async with session_maker.begin() as session:
             query = select(ScoreSchemas).filter_by(score_id=score_id, user_id=user_id)
@@ -213,7 +213,7 @@ class PaymentCrud:
                 pay = PaymentSchemas(**payment.model_dump())
                 session.add(pay)
                 return {'msg': 'the money is credited'}
-            return None
+            return {'msg': 'score not found'}
 
     @staticmethod
     async def get_all_payments(user_id: int) -> list[PaymentModel]:

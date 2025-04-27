@@ -42,7 +42,8 @@ async def create_admin(admin_role: Annotated[UserModel, Depends(get_current_user
 @router.post('/refresh_token', response_model=TokenModel, response_model_exclude_none=True, dependencies=[Depends(HTTP_BEARER)])
 async def auth_refresh_jwt(user: Annotated[UserModel, Depends(get_current_user_for_refresh)]):
     """Обновит access token через refresh token"""
-    access_token = create_access_token(user.model_dump())
+    access_token_expires = timedelta(minutes=setting_access_token.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(user.model_dump(), expires_delta=access_token_expires)
     return TokenModel(access_token=access_token)
 
 

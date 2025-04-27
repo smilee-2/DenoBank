@@ -103,4 +103,4 @@ async def get_current_user_for_refresh(token: Annotated[str, Depends(oauth2_sche
     return user
 
 if __name__ == '__main__':
-    print(get_password_hash('1115509d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7'))
+    print(get_password_hash('1335509d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7')) #trid , scoid, userid, amount, seckey

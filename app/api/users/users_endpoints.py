@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import EmailStr
 
 from app.api.models import UserModel
-from app.api.depends.depends import get_current_user
+from app.api.depends.depends import get_current_user, get_password_hash
 from app.core.config.config import HTTP_BEARER
 from app.core.database.crud import UserCrud, ScoreCrud
 
@@ -53,7 +53,8 @@ async def update_password(new_password: str,
     """Обновит password пользователя"""
     if not user.state:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='user disable')
-    return await UserCrud.patch_password(new_password=new_password, email=user.email)
+    hash_password = get_password_hash(password=new_password)
+    return await UserCrud.patch_password(new_password=hash_password, email=user.email)
 
 
 @router.delete('/delete_score')
