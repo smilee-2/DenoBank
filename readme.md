@@ -10,6 +10,13 @@ __данные для тестов__
 - user:
   - email - user@mail.ru
   - password - 123
+
+Пополнить баланс админу (один раз т.к. транзакции уникальны, необходимо обновлять сигнатуру, можно в модуле depends):
+- transaction_id - 2
+- score_id - 3
+- user_id - 3
+- amount - 55
+- сигнатура - $2b$12$uLfU3o5QTTU1agk4/mqOmuPACOysPdCyNicYwg8ItzfO2.I6838DS
 ___
 
 Необходимо реализовать работу со следующими сущностями:
